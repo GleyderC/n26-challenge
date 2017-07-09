@@ -15,7 +15,7 @@ import static org.junit.Assert.assertThat;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class N26ApplicationTests {
-        
+
     @Autowired
     private ApplicationContext context;
 

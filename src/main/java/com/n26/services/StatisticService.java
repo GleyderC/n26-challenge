@@ -33,21 +33,18 @@ public class StatisticService {
         this.transactionMap = transactionMap;
     }
     public HashMap<String,Object> getTransactionsWithinTime(long sc) {
-        final int[] count = {0};
-        final double[] avg = {0};
-        final double[] sum = {0};
         HashMap<String,Object >response = new HashMap<>();
-        this.getTransactionMap().forEach((time,transaction)->{
-            long secs  = (System.currentTimeMillis()-transaction.getTimestamp())/1000l;
-            if(secs<seconds){
-                count[0]++;
-                sum[0] = sum[0]+  transaction.getAmount();
-                avg[0] = sum[0]/count[0];
-                response.put("sum",sum[0]);
-                response.put("avg",avg[0]);
-                response.put("count",count[0]);
-            }
-        });
+        final int count =   this.getTransactionMap().size();
+        final double sum = this.getTransactionMap().values().stream().mapToDouble(s -> s.getAmount()).sum();
+        final double max = this.getTransactionMap().values().stream().mapToDouble(s -> s.getAmount()).max().getAsDouble();
+        final double min = this.getTransactionMap().values().stream().mapToDouble(s -> s.getAmount()).min().getAsDouble();
+        final double avg = this.getTransactionMap().values().stream().mapToDouble(s -> s.getAmount()).sum() /this.getTransactionMap().size();
+        response.put("sum",sum);
+        response.put("max",max);
+        response.put("min",min);
+        response.put("avg",avg);
+        response.put("count",count);
         return response;
     }
 }
+

@@ -13,7 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.OptionalDouble;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -28,21 +30,18 @@ public class StatisticControllerTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
-
+    private final double  amounts[] = {10.0,50.0,55.4,30.0,12.0,1.0,200.0,10.0,33.0,2.0};
 
     @Test
     public void shouldValidateTransactions() throws Exception {
         ExecutorService executor = Executors.newFixedThreadPool(10);
-
         for (int i = 0; i < 10; i++) {
-
             Transaction transaction = new Transaction();
-            transaction.setAmount(10.0);
+            transaction.setAmount(amounts[i]);
             Thread.sleep(10);
             transaction.setTimestamp(System.currentTimeMillis());
             Runnable worker = new RunnableTest(transaction);
             executor.execute(worker);
-
         }
         executor.shutdown();
 
@@ -51,9 +50,16 @@ public class StatisticControllerTest {
         if (executor.isTerminated()) {
             ResponseEntity resp = this.restTemplate.getForEntity("http://localhost:" + this.port + "/statistics", HashMap.class);
             HashMap<String, Object> data = (HashMap<String, Object>) resp.getBody();
-            Assert.assertEquals(100.0, data.get("sum"));
-            Assert.assertEquals(10.0, data.get("avg"));
-            Assert.assertEquals(10, data.get("count"));
+            double max = Arrays.stream(amounts).max().getAsDouble();//200.0
+            double min = Arrays.stream(amounts).min().getAsDouble();//1.0
+            double sum = Arrays.stream(amounts).sum();//403.4
+            double avg = Arrays.stream(amounts).sum()/amounts.length;//10
+
+            Assert.assertEquals(sum, data.get("sum"));
+            Assert.assertEquals(min, data.get("min"));
+            Assert.assertEquals(max, data.get("max"));
+            Assert.assertEquals(avg, data.get("avg"));
+            Assert.assertEquals(amounts.length, data.get("count"));
         }
     }
 
