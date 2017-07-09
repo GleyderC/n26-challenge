@@ -21,7 +21,6 @@ import java.util.HashMap;
 @TestPropertySource(properties = {"management.port=0"})
 public class TransactionControllerTest {
 
-
     @LocalServerPort
     private int port;
 
